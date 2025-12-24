@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Player - Pedro e Ana Julia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- ESTILO GERAL (CSS) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Circular', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(180deg, #5e1a1a 0%, #121212 100%); /* Gradiente avermelhado como na foto */
+            color: white;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px; /* Tamanho de celular */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* CABEÇALHO */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        /* CARROUSSEL DE FOTOS (ÁLBUM) */
+        .album-cover-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .carousel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Esconder barra de rolagem Firefox */
+        }
+        
+        .carousel::-webkit-scrollbar { 
+            display: none; /* Esconder barra de rolagem Chrome/Safari */
+        }
+
+        .carousel img {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            scroll-snap-align: center;
+        }
+
+        /* INFORMAÇÕES DA MÚSICA */
+        .song-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .song-text h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .song-text p {
+            color: #b3b3b3;
+            font-size: 1rem;
+        }
+
+        .heart-icon {
+            color: #1DB954; /* Verde Spotify */
+            font-size: 1.5rem;
+        }
+
+        /* BARRA DE PROGRESSO */
+        .progress-area {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 0%; /* Será alterado pelo JS */
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #b3b3b3;
+            margin-top: 5px;
+        }
+
+        /* CONTROLES DO PLAYER */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 30px 0;
+        }
+
+        .controls i {
+            font-size: 1.5rem;
+            color: #b3b3b3;
+            cursor: pointer;
+        }
+
+        .controls .play-pause {
+            background: white;
+            color: black;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+        }
+
+        /* CARD DO CASAL (Tempo junto) */
+        .info-card {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .info-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .info-card .subtitle {
+            color: #b3b3b3;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+
+        .time-box {
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .time-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .time-box label {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        /* CARD DE DECLARAÇÃO (Estilo Lyrics/Mensagem) */
+        .message-card {
+            background-color: #1DB954; /* Verde do Spotify ou mude para a cor que preferir */
+            color: black;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+
+        .message-card h3 {
+            margin-bottom: 10px;
+        }
+        
+        .message-card p {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <i class="fas fa-chevron-down"></i>
+            <span>Tocando a playlist "Nossa história"</span>
+            <i class="fas fa-ellipsis-h"></i>
+        </header>
+
+        <div class="album-cover-container">
+            <div class="carousel">
+                <img src="foto1.jpg" >
+                <img src="foto2.jpg" >
+                <img src="foto3.jpg" >
+            </div>
+        </div>
+
+        <div class="song-info">
+            <div class="song-text">
+                <h1>Nome da Música</h1>
+                <p>Nome do Artista</p>
+            </div>
+            <i class="fas fa-check-circle heart-icon"></i>
+        </div>
+
+        <div class="progress-area">
+            <div class="progress-bar" id="progressBar" onclick="seek(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-info">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <i class="fas fa-random"></i>
+            <i class="fas fa-step-backward"></i>
+            <div class="play-pause" onclick="togglePlay()">
+                <i class="fas fa-play" id="playIcon"></i>
+            </div>
+            <i class="fas fa-step-forward"></i>
+            <i class="fas fa-redo"></i>
+        </div>
+
+        <div class="info-card">
+            <h2>Pedro e Ana Julia</h2>
+            <p class="subtitle">Juntos desde 2021</p> <div class="timer-grid">
+                <div class="time-box">
+                    <span id="years">0</span>
+                    <label>Anos</label>
+                </div>
+                <div class="time-box">
+                    <span id="months">0</span>
+                    <label>Meses</label>
+                </div>
+                <div class="time-box">
+                    <span id="days">0</span>
+                    <label>Dias</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="message-card">
+            <h3>Mensagem especial</h3>
+            <p>
+                Oi meu jujubinha, eu queria dizer que eu te amo muitão, 
+                eu amo estar ao seu lado e sei que vamos construir uma vida linda juntos. 
+                Eu amo você minha pulguinha!
+            </p>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" src="musica.mp3"></audio>
+
+    <script>
+        /* --- LÓGICA JAVASCRIPT --- */
+
+        // 1. CONFIGURAÇÃO DA DATA DE INÍCIO DO NAMORO
+        // Mude aqui: Ano, Mês (0-11, onde 0 é Janeiro), Dia
+        const startDate = new Date(2021, 0, 15); // Exemplo: 15 de Janeiro de 2025
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+
+            const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+            const months = Math.floor((diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+            const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+
+            document.getElementById('years').innerText = years;
+            document.getElementById('months').innerText = months;
+            document.getElementById('days').innerText = days;
+        }
+        
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Rodar imediatamente
+
+        // 2. PLAYER DE MÚSICA
+        const audio = document.getElementById('audioPlayer');
+        const playIcon = document.getElementById('playIcon');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.classList.remove('fa-play');
+                playIcon.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playIcon.classList.add('fa-play');
+                playIcon.classList.remove('fa-pause');
+            }
+        }
+
+        // Atualizar barra de progresso
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+            
+            // Atualizar tempo texto
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+            if(audio.duration) {
+                durationEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        // Clicar na barra para pular
+        function seek(e) {
+            const progressBar = document.getElementById('progressBar');
+            const percent = e.offsetX / progressBar.offsetWidth;
+            audio.currentTime = percent * audio.duration;
+        }
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+    </script>
+</body>
+</html>
